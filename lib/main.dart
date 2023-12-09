@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:todoapp/dialogs/todo_edit_dialog.dart';
 
 void main() {
   //main
@@ -144,7 +146,7 @@ class _ToDoListState extends State<ToDoList> {
   }
 }
 
-class TodoItem extends StatelessWidget {
+class TodoItem extends StatefulWidget {
   TodoItem(
       {required this.todo,
       required this.onToDoChanged,
@@ -154,6 +156,12 @@ class TodoItem extends StatelessWidget {
   final ToDo todo;
   final void Function(ToDo todo) onToDoChanged;
   final void Function(ToDo todo) onToDoDeletet;
+
+  @override
+  State<TodoItem> createState() => _TodoItemState();
+}
+
+class _TodoItemState extends State<TodoItem> {
   TextStyle? _getTextStyle(bool checked) {
     if (!checked) return null;
 
@@ -167,43 +175,64 @@ class TodoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () {
-        onToDoChanged(todo);
+        widget.onToDoChanged(widget.todo);
       },
       leading: Checkbox(
         checkColor: Colors.greenAccent,
         activeColor: Colors.red,
-        value: todo.completed,
+        value: widget.todo.completed,
         onChanged: (value) {
-          onToDoChanged(todo);
+          widget.onToDoChanged(widget.todo);
         },
       ),
-      title: Row(children: <Widget>[
-        Expanded(
-          child: Text(todo.name, style: _getTextStyle(todo.completed)),
-        ),
-        IconButton(
-          iconSize: 30,
-          icon: const Icon(
-            Icons.delete,
-            color: Colors.red,
+      title: Row(
+        children: <Widget>[
+          Expanded(
+            child: Text(widget.todo.name,
+                style: _getTextStyle(widget.todo.completed)),
           ),
-          alignment: Alignment.centerRight,
-          onPressed: () {
-            onToDoDeletet(todo);
-          },
-        ),
-        IconButton(
-          iconSize: 30,
-          icon: const Icon(
-            Icons.update,
-            color: Colors.blue,
+          IconButton(
+            iconSize: 30,
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+            alignment: Alignment.centerRight,
+            onPressed: () {
+              widget.onToDoDeletet(widget.todo);
+            },
           ),
-          alignment: Alignment.centerRight,
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ]),
+          IconButton(
+            iconSize: 30,
+            icon: const Icon(
+              Icons.edit,
+              color: Colors.blue,
+            ),
+            alignment: Alignment.centerRight,
+            onPressed: () {
+              showDialog(
+                useSafeArea: true,
+                context: context,
+                builder: (context) => TodoEditDialog(
+                  toDo: widget.todo,
+                  onEditCompleted: onTodoUpdatedCallBack,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
+  }
+
+  void onTodoUpdatedCallBack(ToDo updatedTodo) {
+    if (kDebugMode) {
+      print("${updatedTodo.name} guncellendi");
+
+      setState(() {
+        widget.todo.name = updatedTodo.name;
+        widget.todo.completed = updatedTodo.completed;
+      });
+    }
   }
 }
