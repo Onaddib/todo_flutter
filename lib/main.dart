@@ -27,9 +27,10 @@ class ToDoApp extends StatelessWidget {
 }
 
 class ToDo {
-  ToDo({required this.name, required this.completed});
+  ToDo({required this.name, required this.completed, required this.id});
   String name;
   bool completed;
+  int id;
 }
 
 class ToDoList extends StatefulWidget {
@@ -44,10 +45,17 @@ class ToDoList extends StatefulWidget {
 class _ToDoListState extends State<ToDoList> {
   final List<ToDo> _toDos = <ToDo>[];
   final TextEditingController _textFieldController = TextEditingController();
+  int _counter = 1;
 
-  void _addToDoItem(String name) {
+  void incrementer() {
     setState(() {
-      _toDos.add(ToDo(name: name, completed: false));
+      _counter++;
+    });
+  }
+
+  void _addToDoItem(String name, int id) {
+    setState(() {
+      _toDos.add(ToDo(name: name, id: _counter, completed: false));
     });
     _textFieldController.clear();
   }
@@ -96,7 +104,8 @@ class _ToDoListState extends State<ToDoList> {
                   ),
                   onPressed: () {
                     Navigator.of(context).pop();
-                    _addToDoItem(_textFieldController.text);
+                    _addToDoItem(_textFieldController.text, _counter);
+                    incrementer();
                   },
                   child: const Text('ekle'),
                 )
@@ -227,7 +236,7 @@ class _TodoItemState extends State<TodoItem> {
 
   void onTodoUpdatedCallBack(ToDo updatedTodo) {
     if (kDebugMode) {
-      print("${updatedTodo.name} guncellendi");
+      print("${updatedTodo.name} ve ${updatedTodo.id} guncellendi");
 
       setState(() {
         widget.todo.name = updatedTodo.name;
