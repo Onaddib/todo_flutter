@@ -117,6 +117,26 @@ class _ToDoListState extends State<ToDoList> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          actions: [
+            InkWell(
+              onTap: () => print("Hive"),
+              borderRadius: BorderRadius.circular(50),
+              splashColor: Colors.red,
+              highlightColor: Colors.yellow,
+              hoverColor: Colors.green,
+              child: Ink(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset(
+                  "assets/images/hive_logo.png",
+                  width: 32,
+                  height: 32,
+                ),
+              ),
+            ),
+          ],
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: Text("To Do App"),
         ),
