@@ -68,7 +68,7 @@ class _ToDoListState extends State<ToDoList> {
 
   void _handleToDoDelete(ToDo todo) {
     setState(() {
-      _toDos.removeWhere((item) => item.id == item.id);
+      _toDos.removeWhere((item) => item.id == todo.id);
     });
   }
 
@@ -78,7 +78,7 @@ class _ToDoListState extends State<ToDoList> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
-              title: const Text('Not Ekle!'),
+              title: const Text("Not Ekle!"),
               content: TextField(
                 controller: _textFieldController,
                 decoration: const InputDecoration(hintText: 'Buraya Giriniz'),
