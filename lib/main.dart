@@ -68,7 +68,7 @@ class _ToDoListState extends State<ToDoList> {
 
   void _handleToDoDelete(ToDo todo) {
     setState(() {
-      _toDos.removeWhere((item) => item.name == item.name);
+      _toDos.removeWhere((item) => item.id == item.id);
     });
   }
 
@@ -239,7 +239,7 @@ class _TodoItemState extends State<TodoItem> {
       print("${updatedTodo.name} ve ${updatedTodo.id} guncellendi");
 
       setState(() {
-        widget.todo.name = updatedTodo.name;
+        widget.todo.id = updatedTodo.id;
         widget.todo.completed = updatedTodo.completed;
       });
     }
