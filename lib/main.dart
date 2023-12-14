@@ -31,7 +31,6 @@ class _ToDoAppState extends State<ToDoApp> {
   _ToDoAppState();
   ThemeMode _themeMode = ThemeMode.system;
 
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -55,8 +54,13 @@ class _ToDoAppState extends State<ToDoApp> {
 }
 
 class ToDo {
-  ToDo({required this.name, required this.completed, required this.id});
+  ToDo(
+      {required this.name,
+      required this.completed,
+      required this.id,
+      required this.imageId});
   String name;
+  File? imageId;
   bool completed;
   int id;
 }
@@ -83,7 +87,8 @@ class _ToDoListState extends State<ToDoList> {
 
   void _addToDoItem(String name, int id) {
     setState(() {
-      _toDos.add(ToDo(name: name, id: _counter, completed: false));
+      _toDos.add(
+          ToDo(name: name, id: _counter, completed: false, imageId: _image));
     });
     _textFieldController.clear();
   }
@@ -99,6 +104,7 @@ class _ToDoListState extends State<ToDoList> {
       _toDos.removeWhere((item) => item.id == todo.id);
     });
   }
+
   File? _image;
 
   Future getImage() async {
@@ -109,7 +115,7 @@ class _ToDoListState extends State<ToDoList> {
     final imageTemporary = File(image.path);
 
     setState(() {
-      this._image = imageTemporary;
+      _image = imageTemporary;
     });
   }
 
@@ -120,18 +126,14 @@ class _ToDoListState extends State<ToDoList> {
         builder: (BuildContext context) {
           return AlertDialog(
               title: const Text("Not Ekle!"),
-              content:
-              
-               Column(
-
-                 children: <Widget>[ TextField(
+              content: Column(children: <Widget>[
+                TextField(
                   controller: _textFieldController,
                   decoration: const InputDecoration(hintText: 'Buraya Giriniz'),
                   autofocus: true,
-                               ),
-               if (_image != null) Image.file(_image!, width: 250, height: 250, fit: BoxFit.cover) 
-                ]),
-
+                ),
+                Image.file(_image!, width: 250, height: 250, fit: BoxFit.cover)
+              ]),
               actions: <Widget>[
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
@@ -151,19 +153,13 @@ class _ToDoListState extends State<ToDoList> {
                     ),
                   ),
                   onPressed: () {
-                  
                     Navigator.of(context).pop();
                     _addToDoItem(_textFieldController.text, _counter);
                     incrementer();
                   },
                   child: const Text('ekle'),
                 ),
-                ElevatedButton(
-                  onPressed: getImage,
-                  child: Text("resim"))
-
-
-
+                ElevatedButton(onPressed: getImage, child: Text("resim"))
               ]);
         });
   }
@@ -252,6 +248,7 @@ class _ToDoListState extends State<ToDoList> {
         ),
         floatingActionButton: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -335,6 +332,8 @@ class _TodoItemState extends State<TodoItem> {
             child: Text(widget.todo.name,
                 style: _getTextStyle(widget.todo.completed)),
           ),
+          Image.file(widget.todo.imageId!,
+              width: 50, height: 50, fit: BoxFit.cover),
           IconButton(
             iconSize: 30,
             icon: const Icon(

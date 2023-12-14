@@ -35,6 +35,8 @@ class TodoEditDialog extends StatelessWidget {
                   onChanged: (String value) => toDo.name = value,
                 ),
               ),
+              Image.file(toDo.imageId!,
+                      width: 200, height: 200, fit: BoxFit.cover),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
