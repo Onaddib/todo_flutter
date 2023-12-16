@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:todoapp/dialogs/todo_add_dialog.dart';
 import 'package:todoapp/model/language_model.dart';
 import 'package:todoapp/model/todo_model.dart';
@@ -6,6 +10,9 @@ import 'package:todoapp/model/todo_model.dart';
 import 'views/todo_item_widget.dart';
 
 void main() {
+  var path = Directory.current.path;
+  Hive.init(path);
+
   runApp(const ToDoApp());
 }
 
@@ -86,11 +93,16 @@ class _ToDoListState extends State<ToDoList> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) => const TodoAddDialog(),
-    ).then((value) {
+    ).then((value) async {
       if (value != null) {
         setState(() {
           _toDos.add(value);
         });
+
+        var box = await Hive.openBox('TodosBox');
+
+        String data = jsonEncode(value);
+        box.put(value.id, data);
       }
     });
   }
