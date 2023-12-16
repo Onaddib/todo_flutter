@@ -3,9 +3,10 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+//import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:todoapp/dialogs/todo_edit_dialog.dart';
+import 'package:todoapp/model/language_model.dart';
 
 //import 'package:hive/hive.dart';
 //import 'package:shared_preferences/shared_preferences.dart';
@@ -30,6 +31,17 @@ class ToDoApp extends StatefulWidget {
 class _ToDoAppState extends State<ToDoApp> {
   _ToDoAppState();
   ThemeMode _themeMode = ThemeMode.system;
+
+  LanguageModel? _chosenValue;
+  final List<LanguageModel> _languages = List.empty(growable: true);
+
+  @override
+  void initState() {
+    super.initState();
+    _languages.add(LanguageModel(code: 'en', name: 'english'));
+    _languages.add(LanguageModel(code: 'es', name: 'espinosa'));
+    _languages.add(LanguageModel(code: 'tr', name: 'turkish'));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +127,7 @@ class _ToDoListState extends State<ToDoList> {
     final imageTemporary = File(image.path);
 
     setState(() {
-      _image = imageTemporary;
+      this._image = imageTemporary;
     });
   }
 
@@ -132,7 +144,9 @@ class _ToDoListState extends State<ToDoList> {
                   decoration: const InputDecoration(hintText: 'Buraya Giriniz'),
                   autofocus: true,
                 ),
-                Image.file(_image!, width: 250, height: 250, fit: BoxFit.cover)
+                if (_image != null)
+                  Image.file(_image!,
+                      width: 250, height: 250, fit: BoxFit.cover),
               ]),
               actions: <Widget>[
                 OutlinedButton(
@@ -159,131 +173,185 @@ class _ToDoListState extends State<ToDoList> {
                   },
                   child: const Text('ekle'),
                 ),
-                ElevatedButton(onPressed: getImage, child: Text("resim"))
+                ElevatedButton(onPressed: getImage, child: const Text("resim"))
               ]);
         });
   }
 
+  final items = ["item1", "item2"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                  ),
-                  child: Center(
-                      child: Text(
-                    "Settings",
-
-                    // style: TextStyle(fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize),
-                  ))),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Padding(padding: EdgeInsets.all(8)),
-                    ElevatedButton(
-                      onPressed: () =>
-                          ToDoApp.of(context).changeTheme(ThemeMode.light),
-                      child: const Text("Light"),
-                    ),
-                    const Padding(padding: EdgeInsets.all(8)),
-                    ElevatedButton(
-                        onPressed: () =>
-                            ToDoApp.of(context).changeTheme(ThemeMode.dark),
-                        child: const Text("Dark"))
-                  ],
-                ),
-              ),
-              const Column()
-            ],
-          ),
-        ),
-        appBar: AppBar(
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(4.0),
-            child: Container(
-              color: Colors.blue[900],
-              height: 4.0,
-            ),
-          ),
-          actions: [
-            InkWell(
-              // ignore: avoid_print
-              onTap: () => print("Hive"),
-              borderRadius: BorderRadius.circular(50),
-              highlightColor: Colors.grey[600],
-              hoverColor: Colors.grey[700],
-              child: Ink(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                padding: const EdgeInsets.all(8.0),
-                child: const Icon(Icons.settings),
-              ),
-            ),
-          ],
-          // backgroundColor: Colors.blue,
-          title: const Text("To Do App"),
-        ),
-        body: Center(
-          child: Container(
-            //color: Colors.white,
-            child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                children: _toDos.map((ToDo todo) {
-                  return TodoItem(
-                    todo: todo,
-                    onToDoChanged: _handleToDoChange,
-                    onToDoDeletet: _handleToDoDelete,
-                  );
-                }).toList()),
-          ),
-        ),
-        floatingActionButton: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: FloatingActionButton(
-                backgroundColor: const Color.fromARGB(255, 167, 6, 14),
-                onPressed: () => _displayDialog(),
-                tooltip: 'Add a todo',
-                child: const Icon(Icons.add),
-              ),
+            const DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.amber,
+                ),
+                child: Center(
+                    child: Text(
+                  "Settings",
+
+                  // style: TextStyle(fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize),
+                ))),
+            Card(
+                color: Colors.amber[100],
+                elevation: 6,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Padding(padding: EdgeInsets.all(8)),
+                      ElevatedButton(
+                        onPressed: () =>
+                            ToDoApp.of(context).changeTheme(ThemeMode.light),
+                        child: const Text("Light"),
+                      ),
+                      const Padding(padding: EdgeInsets.all(8)),
+                      ElevatedButton(
+                          onPressed: () =>
+                              ToDoApp.of(context).changeTheme(ThemeMode.dark),
+                          child: const Text("Dark")),
+                    ],
+                  ),
+                )),
+
+            /*
+            DropdownButton<LanguageModel>(  
+
+              dropdownColor: Theme.of(context).primaryColor,
+              iconEnabledColor: Theme.of(context).colorScheme.background,
+
+              items: _languages.map<DropdownMenuItem<LanguageModel>>((LanguageModel value) {
+                return DropdownMenuItem<LanguageModel>(
+                  value: value,
+                   child:const Text("heyy"),
+                );
+              }
+              ), 
+              
+              onChanged: (LanguageModel? value) {  },
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: FloatingActionButton(
-                backgroundColor: const Color.fromARGB(255, 239, 147, 34),
-                onPressed: () => _displayDialog(),
-                tooltip: 'Add a pic',
-                child: const Icon(Icons.add),
-              ),
-            ),
-            //      Padding(
-            //        padding: const EdgeInsets.all(8.0),
-            //        child: ElevatedButton(
-            //          onPressed: () => ToDoApp.of(context).changeTheme(ThemeMode.light),
-            //          child: const Text("Light"),
-            //          ),
-            //      ),
-            //      Padding(
-            //        padding: const EdgeInsets.all(8.0),
-            //        child: ElevatedButton(
-            //          onPressed: () => ToDoApp.of(context).changeTheme(ThemeMode.dark),
-            //          child: const Text("Dark"),
-            //          ),
-            //     )
+
+            */
+
+/*
+              ReorderableListView(
+
+                onReorder: (oldIndex, newIndex) {
+                  setState(() {
+                    final item = items.removeAt(oldIndex);
+                    items.insert(newIndex, item);
+                  });
+                },
+                children: [
+                  for(final item in items)
+                  ListTile(
+                    key: ValueKey(item),
+                    title: Text(item),
+                  )
+                ],
+                
+              )*/
           ],
-        ));
+        ),
+      ),
+      appBar: AppBar(
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4.0),
+          child: Container(
+            color: Colors.blue[900],
+            height: 4.0,
+          ),
+        ),
+        actions: [
+          InkWell(
+            // ignore: avoid_print
+            onTap: () => print("Hive"),
+            borderRadius: BorderRadius.circular(50),
+            highlightColor: Colors.grey[600],
+            hoverColor: Colors.grey[700],
+            child: Ink(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+              ),
+              padding: const EdgeInsets.all(8.0),
+              child: const Icon(Icons.settings),
+            ),
+          ),
+        ],
+        // backgroundColor: Colors.blue,
+        title: const Text("To Do App"),
+      ),
+      body: Center(
+        child: Container(
+          //color: Colors.white,
+          child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              children: _toDos.map((ToDo todo) {
+                return TodoItem(
+                  todo: todo,
+                  onToDoChanged: _handleToDoChange,
+                  onToDoDeletet: _handleToDoDelete,
+                );
+              }).toList()),
+        ),
+      ),
+
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              backgroundColor: const Color.fromARGB(255, 167, 6, 14),
+              onPressed: () => _displayDialog(),
+              tooltip: 'Add a todo',
+              child: const Icon(Icons.add),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              backgroundColor: const Color.fromARGB(255, 239, 147, 34),
+              onPressed: () => _displayDialog(),
+              tooltip: 'Add a pic',
+              child: const Icon(Icons.add),
+            ),
+          ),
+          //      Padding(
+          //        padding: const EdgeInsets.all(8.0),
+          //        child: ElevatedButton(
+          //          onPressed: () => ToDoApp.of(context).changeTheme(ThemeMode.light),
+          //          child: const Text("Light"),
+          //          ),
+          //      ),
+          //      Padding(
+          //        padding: const EdgeInsets.all(8.0),
+          //        child: ElevatedButton(
+          //          onPressed: () => ToDoApp.of(context).changeTheme(ThemeMode.dark),
+          //          child: const Text("Dark"),
+          //          ),
+          //     )
+        ],
+      ),
+
+      //floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+      bottomNavigationBar: const BottomAppBar(
+        //bottom navigation bar on scaffold
+        color: Colors.black,
+        shape: CircularNotchedRectangle(), //shape of notch
+        notchMargin:
+            10, //notche margin between floating button and bottom appbar
+      ),
+    );
   }
 }
 
@@ -314,56 +382,61 @@ class _TodoItemState extends State<TodoItem> {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      onTap: () {
-        widget.onToDoChanged(widget.todo);
-      },
-      leading: Checkbox(
-        checkColor: Colors.greenAccent,
-        activeColor: Colors.red,
-        value: widget.todo.completed,
-        onChanged: (value) {
+    return Card(
+      margin: const EdgeInsets.all(5),
+      elevation: 5,
+      //color: Colors.lightBlue[50],
+      child: ListTile(
+        onTap: () {
           widget.onToDoChanged(widget.todo);
         },
-      ),
-      title: Row(
-        children: <Widget>[
-          Expanded(
-            child: Text(widget.todo.name,
-                style: _getTextStyle(widget.todo.completed)),
-          ),
-          Image.file(widget.todo.imageId!,
-              width: 50, height: 50, fit: BoxFit.cover),
-          IconButton(
-            iconSize: 30,
-            icon: const Icon(
-              Icons.delete,
-              color: Colors.red,
+        leading: Checkbox(
+          checkColor: Colors.greenAccent,
+          activeColor: Colors.red,
+          value: widget.todo.completed,
+          onChanged: (value) {
+            widget.onToDoChanged(widget.todo);
+          },
+        ),
+        title: Row(
+          children: <Widget>[
+            Expanded(
+              child: Text(widget.todo.name,
+                  style: _getTextStyle(widget.todo.completed)),
             ),
-            alignment: Alignment.centerRight,
-            onPressed: () {
-              widget.onToDoDeletet(widget.todo);
-            },
-          ),
-          IconButton(
-            iconSize: 30,
-            icon: const Icon(
-              Icons.edit,
-              color: Colors.blue,
+            Image.file(widget.todo.imageId!,
+                width: 50, height: 50, fit: BoxFit.cover),
+            IconButton(
+              iconSize: 30,
+              icon: const Icon(
+                Icons.delete,
+                color: Colors.red,
+              ),
+              alignment: Alignment.centerRight,
+              onPressed: () {
+                widget.onToDoDeletet(widget.todo);
+              },
             ),
-            alignment: Alignment.centerRight,
-            onPressed: () {
-              showDialog(
-                useSafeArea: true,
-                context: context,
-                builder: (context) => TodoEditDialog(
-                  toDo: widget.todo,
-                  onEditCompleted: onTodoUpdatedCallBack,
-                ),
-              );
-            },
-          ),
-        ],
+            IconButton(
+              iconSize: 30,
+              icon: const Icon(
+                Icons.edit,
+                color: Colors.blue,
+              ),
+              alignment: Alignment.centerRight,
+              onPressed: () {
+                showDialog(
+                  useSafeArea: true,
+                  context: context,
+                  builder: (context) => TodoEditDialog(
+                    toDo: widget.todo,
+                    onEditCompleted: onTodoUpdatedCallBack,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
