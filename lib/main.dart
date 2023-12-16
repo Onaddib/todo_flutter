@@ -1,18 +1,11 @@
-//import 'dart:math';
-
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-//import 'package:hive/hive.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:todoapp/dialogs/todo_edit_dialog.dart';
+import 'package:todoapp/dialogs/todo_add_dialog.dart';
 import 'package:todoapp/model/language_model.dart';
+import 'package:todoapp/model/todo_model.dart';
 
-//import 'package:hive/hive.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
+import 'views/todo_item_widget.dart';
 
 void main() {
-  //main
   runApp(const ToDoApp());
 }
 
@@ -32,7 +25,6 @@ class _ToDoAppState extends State<ToDoApp> {
   _ToDoAppState();
   ThemeMode _themeMode = ThemeMode.system;
 
-  LanguageModel? _chosenValue;
   final List<LanguageModel> _languages = List.empty(growable: true);
 
   @override
@@ -65,18 +57,6 @@ class _ToDoAppState extends State<ToDoApp> {
   }
 }
 
-class ToDo {
-  ToDo(
-      {required this.name,
-      required this.completed,
-      required this.id,
-      required this.imageId});
-  String name;
-  File? imageId;
-  bool completed;
-  int id;
-}
-
 class ToDoList extends StatefulWidget {
   const ToDoList({super.key, required this.title});
 
@@ -87,101 +67,39 @@ class ToDoList extends StatefulWidget {
 }
 
 class _ToDoListState extends State<ToDoList> {
-  final List<ToDo> _toDos = <ToDo>[];
-  final TextEditingController _textFieldController = TextEditingController();
-  int _counter = 1;
+  final List<TodoModel> _toDos = <TodoModel>[];
 
-  void incrementer() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  void _addToDoItem(String name, int id) {
-    setState(() {
-      _toDos.add(
-          ToDo(name: name, id: _counter, completed: false, imageId: _image));
-    });
-    _textFieldController.clear();
-  }
-
-  void _handleToDoChange(ToDo todo) {
+  void _handleToDoChange(TodoModel todo) {
     setState(() {
       todo.completed = !todo.completed;
     });
   }
 
-  void _handleToDoDelete(ToDo todo) {
+  void _handleToDoDelete(TodoModel todo) {
     setState(() {
       _toDos.removeWhere((item) => item.id == todo.id);
     });
   }
 
-  File? _image;
-
-  Future getImage() async {
-    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (image == null) {
-      return;
-    }
-    final imageTemporary = File(image.path);
-
-    setState(() {
-      this._image = imageTemporary;
-    });
-  }
-
-  Future<void> _displayDialog() async {
-    return showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-              title: const Text("Not Ekle!"),
-              content: Column(children: <Widget>[
-                TextField(
-                  controller: _textFieldController,
-                  decoration: const InputDecoration(hintText: 'Buraya Giriniz'),
-                  autofocus: true,
-                ),
-                if (_image != null)
-                  Image.file(_image!,
-                      width: 250, height: 250, fit: BoxFit.cover),
-              ]),
-              actions: <Widget>[
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('iptal'),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _addToDoItem(_textFieldController.text, _counter);
-                    incrementer();
-                  },
-                  child: const Text('ekle'),
-                ),
-                ElevatedButton(onPressed: getImage, child: const Text("resim"))
-              ]);
+  Future<void> _showAddDialog() async {
+    return showDialog<TodoModel?>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => const TodoAddDialog(),
+    ).then((value) {
+      if (value != null) {
+        setState(() {
+          _toDos.add(value);
         });
+      }
+    });
   }
 
   final items = ["item1", "item2"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -288,167 +206,42 @@ class _ToDoListState extends State<ToDoList> {
         title: const Text("To Do App"),
       ),
       body: Center(
-        child: Container(
-          //color: Colors.white,
-          child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              children: _toDos.map((ToDo todo) {
-                return TodoItem(
-                  todo: todo,
-                  onToDoChanged: _handleToDoChange,
-                  onToDoDeletet: _handleToDoDelete,
-                );
-              }).toList()),
+        child: ListView(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            children: _toDos.map((TodoModel todo) {
+              return TodoItemWidget(
+                todo: todo,
+                onToDoChanged: _handleToDoChange,
+                onToDoDeletet: _handleToDoDelete,
+              );
+            }).toList()),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color.fromARGB(255, 239, 147, 34),
+        onPressed: () => _showAddDialog(),
+        tooltip: 'Add a todo item',
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
         ),
+        child: const Icon(Icons.add),
       ),
-
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FloatingActionButton(
-              backgroundColor: const Color.fromARGB(255, 167, 6, 14),
-              onPressed: () => _displayDialog(),
-              tooltip: 'Add a todo',
-              child: const Icon(Icons.add),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FloatingActionButton(
-              backgroundColor: const Color.fromARGB(255, 239, 147, 34),
-              onPressed: () => _displayDialog(),
-              tooltip: 'Add a pic',
-              child: const Icon(Icons.add),
-            ),
-          ),
-          //      Padding(
-          //        padding: const EdgeInsets.all(8.0),
-          //        child: ElevatedButton(
-          //          onPressed: () => ToDoApp.of(context).changeTheme(ThemeMode.light),
-          //          child: const Text("Light"),
-          //          ),
-          //      ),
-          //      Padding(
-          //        padding: const EdgeInsets.all(8.0),
-          //        child: ElevatedButton(
-          //          onPressed: () => ToDoApp.of(context).changeTheme(ThemeMode.dark),
-          //          child: const Text("Dark"),
-          //          ),
-          //     )
-        ],
-      ),
-
-      //floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
-      bottomNavigationBar: const BottomAppBar(
-        //bottom navigation bar on scaffold
-        color: Colors.black,
-        shape: CircularNotchedRectangle(), //shape of notch
-        notchMargin:
-            10, //notche margin between floating button and bottom appbar
-      ),
-    );
-  }
-}
-
-class TodoItem extends StatefulWidget {
-  TodoItem(
-      {required this.todo,
-      required this.onToDoChanged,
-      required this.onToDoDeletet})
-      : super(key: ObjectKey(todo));
-
-  final ToDo todo;
-  final void Function(ToDo todo) onToDoChanged;
-  final void Function(ToDo todo) onToDoDeletet;
-
-  @override
-  State<TodoItem> createState() => _TodoItemState();
-}
-
-class _TodoItemState extends State<TodoItem> {
-  TextStyle? _getTextStyle(bool checked) {
-    if (!checked) return null;
-
-    return const TextStyle(
-      color: Colors.black54,
-      decoration: TextDecoration.lineThrough,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(5),
-      elevation: 5,
-      //color: Colors.lightBlue[50],
-      child: ListTile(
-        onTap: () {
-          widget.onToDoChanged(widget.todo);
-        },
-        leading: Checkbox(
-          checkColor: Colors.greenAccent,
-          activeColor: Colors.red,
-          value: widget.todo.completed,
-          onChanged: (value) {
-            widget.onToDoChanged(widget.todo);
-          },
-        ),
-        title: Row(
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 12,
+        color: Colors.blue,
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Expanded(
-              child: Text(widget.todo.name,
-                  style: _getTextStyle(widget.todo.completed)),
-            ),
-            Image.file(widget.todo.imageId!,
-                width: 50, height: 50, fit: BoxFit.cover),
             IconButton(
-              iconSize: 30,
-              icon: const Icon(
-                Icons.delete,
-                color: Colors.red,
-              ),
-              alignment: Alignment.centerRight,
-              onPressed: () {
-                widget.onToDoDeletet(widget.todo);
-              },
-            ),
-            IconButton(
-              iconSize: 30,
-              icon: const Icon(
-                Icons.edit,
-                color: Colors.blue,
-              ),
-              alignment: Alignment.centerRight,
-              onPressed: () {
-                showDialog(
-                  useSafeArea: true,
-                  context: context,
-                  builder: (context) => TodoEditDialog(
-                    toDo: widget.todo,
-                    onEditCompleted: onTodoUpdatedCallBack,
-                  ),
-                );
-              },
+              icon: const Icon(Icons.menu),
+              color: Colors.red,
+              onPressed: () {},
             ),
           ],
         ),
       ),
     );
-  }
-
-  void onTodoUpdatedCallBack(ToDo updatedTodo) {
-    if (kDebugMode) {
-      print("${updatedTodo.name} ve ${updatedTodo.id} guncellendi");
-
-      setState(() {
-        widget.todo.id = updatedTodo.id;
-        widget.todo.completed = updatedTodo.completed;
-      });
-    }
   }
 }

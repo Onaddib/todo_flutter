@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-
-import '../main.dart';
+import '../model/todo_model.dart';
 
 class TodoEditDialog extends StatelessWidget {
-  final ToDo toDo;
-  final Function(ToDo) onEditCompleted;
+  final TodoModel toDo;
+  final Function(TodoModel) onEditCompleted;
 
   const TodoEditDialog({
     super.key,
@@ -21,10 +20,9 @@ class TodoEditDialog extends StatelessWidget {
       margin: const EdgeInsets.all(50),
       child: Material(
         child: Container(
-          
           decoration: const BoxDecoration(
-            //color: Colors.white,
-          ),
+              //color: Colors.white,
+              ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -35,8 +33,14 @@ class TodoEditDialog extends StatelessWidget {
                   onChanged: (String value) => toDo.name = value,
                 ),
               ),
-              Image.file(toDo.imageId!,
-                      width: 200, height: 200, fit: BoxFit.cover),
+              if (toDo.imageFile != null)
+                // TODO: Show image in a constrained box, like it is in add dialog
+                Image.file(
+                  toDo.imageFile!,
+                  width: 200,
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -48,18 +52,16 @@ class TodoEditDialog extends StatelessWidget {
                       child: const Text('Back'),
                     ),
                   ),
-                  
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ElevatedButton(
-                                    onPressed: () {
-                    onEditCompleted(toDo);
-                    Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Save'),
-                                  ),
+                      onPressed: () {
+                        onEditCompleted(toDo);
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Save'),
+                    ),
                   ),
-
                 ],
               ),
             ],
